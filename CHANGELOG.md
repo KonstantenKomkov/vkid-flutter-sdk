@@ -1,3 +1,9 @@
+## Unreleased
+
+### Changed
+- Migrated to AGP 9 built-in Kotlin: the plugin no longer applies the Kotlin Gradle Plugin.
+- Minimum supported SDK is Flutter 3.44 / Dart 3.12.
+
 ## 1.0.3
 - Support for vk.ru
 - Support of horizontal `OneTapBottomSheet`
