@@ -1,0 +1,53 @@
+buildscript {
+    ext.kotlin_version = '2.1.0'
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+plugins {
+    id("vkid.manifest.placeholders") version "1.1.0" apply true
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url("https://artifactory-external.vkpartner.ru/artifactory/vkid-sdk-android/")
+        }
+        maven {
+            url("https://artifactory-external.vkpartner.ru/artifactory/vk-id-captcha/android/")
+        }
+        maven {
+            url("https://artifactory-external.vkpartner.ru/artifactory/maven/")
+        }
+    }
+}
+
+vkidManifestPlaceholders {
+    def properties = new Properties()
+    File propertiesFile = new File("local.properties")
+    propertiesFile.withInputStream { properties.load(it) }
+    def clientId = properties["VKIDClientID"]
+    def clientSecret = properties["VKIDClientSecret"]
+    init(clientId, clientSecret)
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}

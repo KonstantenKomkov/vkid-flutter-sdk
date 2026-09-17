@@ -1,0 +1,17 @@
+#!/bin/sh
+
+notifyAboutRunningTheHook() {
+  echo "*********************************************************"
+  echo "Running git pre-commit hook."
+  echo "*********************************************************"
+}
+
+runDartFormat() {
+  PROJECT_PATH="$(git rev-parse --show-toplevel)"
+  cd "$PROJECT_PATH"
+  dart format .
+}
+
+set -e
+notifyAboutRunningTheHook
+runDartFormat
