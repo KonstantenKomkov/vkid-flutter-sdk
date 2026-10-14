@@ -1,10 +1,7 @@
 pluginManagement {
     repositories {
         maven {
-            url("https://artifactory-external.vkpartner.ru/artifactory/vkid-sdk-android/")
-        }
-        maven {
-            url("https://artifactory-external.vkpartner.ru/artifactory/maven/")
+            url("https://nexus-external.vkteam.ru/repository/maven/")
         }
     }
 }
@@ -12,13 +9,7 @@ pluginManagement {
 dependencyResolutionManagement {
     repositories {
         maven {
-            url("https://artifactory-external.vkpartner.ru/artifactory/vkid-sdk-android/")
-        }
-        maven {
-            url("https://artifactory-external.vkpartner.ru/artifactory/maven/")
-        }
-        maven {
-            url("https://artifactory-external.vkpartner.ru/artifactory/vk-id-captcha/android/")
+            url("https://nexus-external.vkteam.ru/repository/maven/")
         }
     }
 }
