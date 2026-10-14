@@ -136,3 +136,17 @@ rm -r example/ios/Pods
 cd example
 flutter run
 ```
+## Android One Tap rendering
+
+For stale One Tap personalization or native buttons that ignore Flutter overscroll,
+see the [standalone comparison app](examples/one_tap_rendering/README.md) and
+[opt-in Virtual Display implementation](docs/one-tap-android-rendering.md).
+The default composition mode is unchanged.
+
+Library checks (the historical `example/` pins an older Dart SDK):
+
+```sh
+fvm flutter pub get --no-example
+fvm flutter test --no-pub
+fvm flutter analyze --no-pub --no-fatal-infos lib test
+```

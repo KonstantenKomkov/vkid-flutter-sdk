@@ -2,11 +2,15 @@ library vkid;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 part 'onetap/onetap.dart';
+part 'onetap/android_one_tap_view.dart';
+part 'onetap/data/one_tap_android_composition_mode.dart';
 part 'onetap/data/one_tap_corners_style.dart';
 part 'onetap/data/one_tap_o_auth.dart';
 part 'onetap/data/one_tap_size.dart';
