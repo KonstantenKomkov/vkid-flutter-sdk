@@ -8,6 +8,7 @@
 - Release One Tap callback handlers on disposal and ignore redundant native height updates.
 
 ### Changed
+- Migrated Android plugin and sample Maven repositories to VK Nexus (`https://nexus-external.vkteam.ru/repository/maven/`).
 - Migrated to AGP 9 built-in Kotlin: the plugin no longer applies the Kotlin Gradle Plugin.
 - Minimum supported SDK is Flutter 3.44 / Dart 3.12.
 

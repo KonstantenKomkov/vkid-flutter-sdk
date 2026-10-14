@@ -4,9 +4,7 @@ allprojects {
         mavenCentral()
         maven {
             url = uri("https://nexus-external.vkteam.ru/repository/maven/")
-            content { includeGroup("ru.ok.tracer") }
         }
-        maven { url = uri("https://nexus-external.vkteam.ru/repository/vkid-sdk-android/") }
     }
 }
 
