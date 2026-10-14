@@ -28,6 +28,7 @@ import com.vk.id.refreshuser.VKIDGetUserParams
 import com.vk.vkid.flutter.vkid_flutter_sdk.common.pack
 import com.vk.vkid.flutter.vkid_flutter_sdk.oauthwidget.OAuthWidgetViewFactory
 import com.vk.vkid.flutter.vkid_flutter_sdk.onetap.OneTapViewFactory
+import com.vk.vkid.flutter.vkid_flutter_sdk.onetap.OneTapVirtualDisplayViewFactory
 import com.vk.vkid.flutter.vkid_flutter_sdk.sheet.OneTapBottomSheetViewFactory
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -63,6 +64,10 @@ internal class VkidFlutterSdkPlugin : FlutterPlugin, MethodCallHandler {
         flutterPluginBinding.platformViewRegistry.registerViewFactory(
             "OneTap",
             OneTapViewFactory(flutterPluginBinding.binaryMessenger)
+        )
+        flutterPluginBinding.platformViewRegistry.registerViewFactory(
+            "OneTapVirtualDisplay",
+            OneTapVirtualDisplayViewFactory(flutterPluginBinding.binaryMessenger)
         )
         flutterPluginBinding.platformViewRegistry.registerViewFactory(
             "OneTapBottomSheet",

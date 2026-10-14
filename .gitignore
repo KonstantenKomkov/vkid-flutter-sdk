@@ -1,0 +1,13 @@
+.dart_tool/
+.packages
+.flutter-plugins*
+.fvm/
+build/
+**/local.properties
+**/key.properties
+**/*.jks
+**/*.keystore
+**/.gradle/
+**/GeneratedPluginRegistrant.*
+/pubspec.lock
+/example/pubspec.lock

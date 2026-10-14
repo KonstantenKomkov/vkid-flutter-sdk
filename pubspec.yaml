@@ -4,8 +4,8 @@ version: 1.0.3
 homepage: https://id.vk.ru/about/business/go/docs/ru/vkid/latest/vk-id/connection/start-integration/flutter/install
 
 environment:
-  sdk: '>=3.4.4 <4.0.0'
-  flutter: '>=3.22.3'
+  sdk: ^3.12.0
+  flutter: '>=3.44.0'
 
 dependencies:
   dio: ^5.7.0

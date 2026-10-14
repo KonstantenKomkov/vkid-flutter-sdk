@@ -1,3 +1,16 @@
+## Unreleased
+
+### Added
+- Opt-in Android One Tap composition modes, including a Virtual Display workaround for stale Compose personalization.
+- Standalone Android rendering reproduction comparing texture-layer, hybrid and Virtual Display composition.
+
+### Fixed
+- Release One Tap callback handlers on disposal and ignore redundant native height updates.
+
+### Changed
+- Migrated to AGP 9 built-in Kotlin: the plugin no longer applies the Kotlin Gradle Plugin.
+- Minimum supported SDK is Flutter 3.44 / Dart 3.12.
+
 ## 1.0.3
 - Support for vk.ru
 - Support of horizontal `OneTapBottomSheet`

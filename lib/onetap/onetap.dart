@@ -28,6 +28,14 @@ class OneTap extends StatefulWidget {
   final UIAuthParams _authParams;
   final OneTapTitleScenario _scenario;
 
+  /// Android platform-view composition. Ignored on iOS.
+  ///
+  /// Defaults to the existing texture-layer behavior. Use
+  /// [OneTapAndroidCompositionMode.virtualDisplay] when Compose personalization
+  /// is stale in texture-layer mode and Flutter transforms must be preserved.
+  /// Give the widget a new key when switching modes at runtime.
+  final OneTapAndroidCompositionMode androidCompositionMode;
+
   static _defaultOnAuthCode(AuthCodeData data, bool isCompletion) {}
   static _defaultOnError(OneTapOAuth? oAuth, AuthError error) {}
 
@@ -53,17 +61,18 @@ class OneTap extends StatefulWidget {
     bool signInToAnotherAccountButtonEnabled = true,
     UIAuthParams authParams = const UIAuthParams._(),
     OneTapTitleScenario scenario = OneTapTitleScenario.signIn,
-  })  : _onAuth = onAuth,
-        _onAuthCode = onAuthCode,
-        _onError = onError,
-        _alternativeOAuths = const {},
-        _style = style,
-        _fastAuthEnabled = fastAuthEnabled,
-        _signInToAnotherAccountButtonEnabled =
-            signInToAnotherAccountButtonEnabled,
-        _authParams = authParams,
-        _scenario = scenario,
-        super(key: key);
+    this.androidCompositionMode = OneTapAndroidCompositionMode.textureLayer,
+  }) : _onAuth = onAuth,
+       _onAuthCode = onAuthCode,
+       _onError = onError,
+       _alternativeOAuths = const {},
+       _style = style,
+       _fastAuthEnabled = fastAuthEnabled,
+       _signInToAnotherAccountButtonEnabled =
+           signInToAnotherAccountButtonEnabled,
+       _authParams = authParams,
+       _scenario = scenario,
+       super(key: key);
 
   /// Constructs a [OneTap] with alternative [OAuth]s.
   /// The styling in this case is limited.
@@ -89,17 +98,18 @@ class OneTap extends StatefulWidget {
     bool signInToAnotherAccountButtonEnabled = true,
     UIAuthParams authParams = const UIAuthParams._(),
     OneTapTitleScenario scenario = OneTapTitleScenario.signIn,
-  })  : _onAuth = onAuth,
-        _onAuthCode = onAuthCode,
-        _onError = onError,
-        _alternativeOAuths = alternativeOAuths,
-        _style = style.toOneTapStyle(),
-        _fastAuthEnabled = fastAuthEnabled,
-        _signInToAnotherAccountButtonEnabled =
-            signInToAnotherAccountButtonEnabled,
-        _authParams = authParams,
-        _scenario = scenario,
-        super(key: key);
+    this.androidCompositionMode = OneTapAndroidCompositionMode.textureLayer,
+  }) : _onAuth = onAuth,
+       _onAuthCode = onAuthCode,
+       _onError = onError,
+       _alternativeOAuths = alternativeOAuths,
+       _style = style.toOneTapStyle(),
+       _fastAuthEnabled = fastAuthEnabled,
+       _signInToAnotherAccountButtonEnabled =
+           signInToAnotherAccountButtonEnabled,
+       _authParams = authParams,
+       _scenario = scenario,
+       super(key: key);
 
   @override
   State<StatefulWidget> createState() => _OneTapState();
@@ -107,6 +117,7 @@ class OneTap extends StatefulWidget {
 
 class _OneTapState extends State<OneTap> {
   int nativeHeight = 0;
+  MethodChannel? _callbackChannel;
 
   @override
   Widget build(BuildContext context) {
@@ -130,12 +141,12 @@ class _OneTapState extends State<OneTap> {
       widget._authParams._authFlowData is PublicFlowData
           ? null
           : (widget._authParams._authFlowData as ConfidentialFlowData)
-              .codeChallenge,
+                .codeChallenge,
       widget._authParams._scopes.toList(),
       // ignore: sdk_version_since
       widget._scenario.name,
     ];
-    StatefulWidget view;
+    Widget view;
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         view = UiKitView(
@@ -150,12 +161,23 @@ class _OneTapState extends State<OneTap> {
           height = nativeHeight == 0 ? 1.0 : nativeHeight.toDouble();
         }
       case TargetPlatform.android:
-        view = AndroidView(
-          viewType: 'OneTap',
-          creationParams: creationParams,
-          creationParamsCodec: const StandardMessageCodec(),
-          onPlatformViewCreated: (id) => _setCallback(id),
-        );
+        view = switch (widget.androidCompositionMode) {
+          OneTapAndroidCompositionMode.hybrid => _AndroidOneTapHybridView(
+            creationParams: creationParams,
+            onPlatformViewCreated: _setCallback,
+          ),
+          OneTapAndroidCompositionMode.textureLayer ||
+          OneTapAndroidCompositionMode.virtualDisplay => AndroidView(
+            viewType:
+                widget.androidCompositionMode ==
+                    OneTapAndroidCompositionMode.virtualDisplay
+                ? 'OneTapVirtualDisplay'
+                : 'OneTap',
+            creationParams: creationParams,
+            creationParamsCodec: const StandardMessageCodec(),
+            onPlatformViewCreated: _setCallback,
+          ),
+        };
         if (widget._alternativeOAuths.isEmpty &&
             !widget._signInToAnotherAccountButtonEnabled) {
           height = widget._style.size.value.toDouble();
@@ -163,7 +185,7 @@ class _OneTapState extends State<OneTap> {
           height = nativeHeight == 0
               ? 1000.0
               : nativeHeight.toDouble() /
-                  MediaQuery.of(context).devicePixelRatio;
+                    MediaQuery.of(context).devicePixelRatio;
         }
       default:
         throw UnsupportedError('Unsupported platform');
@@ -171,16 +193,30 @@ class _OneTapState extends State<OneTap> {
     return SizedBox(height: height, child: view);
   }
 
-  void _setCallback(int id) async {
+  @override
+  void dispose() {
+    _callbackChannel?.setMethodCallHandler(null);
+    super.dispose();
+  }
+
+  void _setCallback(int id) {
     MethodChannel channel = MethodChannel("com.vk.id/onetap-$id");
+    _callbackChannel?.setMethodCallHandler(null);
+    _callbackChannel = channel;
     channel.setMethodCallHandler((call) async {
+      if (!mounted) return null;
       if (call.method == "onHeight") {
-        setState(() {
-          nativeHeight = call.arguments as int;
-        });
+        final int height = call.arguments as int;
+        if (height != nativeHeight) {
+          setState(() => nativeHeight = height);
+        }
       } else {
         _handleMethod(
-            widget._onAuth, widget._onAuthCode, widget._onError, call);
+          widget._onAuth,
+          widget._onAuthCode,
+          widget._onError,
+          call,
+        );
       }
       return null;
     });
