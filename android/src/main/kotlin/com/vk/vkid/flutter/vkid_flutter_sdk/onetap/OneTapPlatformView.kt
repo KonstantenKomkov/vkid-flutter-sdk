@@ -4,10 +4,18 @@ import android.content.Context
 import android.view.View
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Recomposer
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.createLifecycleAwareWindowRecomposer
 import com.vk.id.VKIDAuthFail
 import com.vk.id.auth.VKIDAuthUiParams
 import com.vk.id.onetap.common.OneTapOAuth
@@ -28,6 +36,8 @@ internal class OneTapPlatformView(
     private val arguments: List<Any?>,
 ) : PlatformView {
     private val composeView = ComposeView(context)
+    private var hostView: View? = null
+    private var hostRecomposer: Recomposer? = null
 
     private var hasParams = mutableStateOf(false)
 
@@ -42,6 +52,10 @@ internal class OneTapPlatformView(
 
     init {
         initParams()
+        // Virtual Display temporarily detaches its Presentation when its surface is recreated.
+        // The default detach strategy discards the profile and starts the loading animation again.
+        composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        composeView.setContent { Content() }
     }
 
     private fun initParams() {
@@ -100,37 +114,70 @@ internal class OneTapPlatformView(
     @Composable
     private fun Content() {
         if (!hasParams.value) return
-        OneTap(
-            modifier = Modifier.wrapContentHeight().onGloballyPositioned {
-                methodChannel.invokeMethod("onHeight", it.size.height)
-            },
-            onAuth = { oAuth, token ->
-                methodChannel.invokeMethod("onAuth", token.pack { error("No id token") }?.let { it + listOf(oAuth?.name?.lowercase()) })
-            },
-            onAuthCode = { data, isCompletion ->
-                if (isCompletion) methodChannel.invokeMethod("onAuthCode", data.pack(context))
-            },
-            onFail = { oAuth, fail ->
-                val code = if (fail is VKIDAuthFail.Canceled) "cancelled" else fail::class.java.name
-                methodChannel.invokeMethod("onError", listOf(code, fail.description, oAuth?.name?.lowercase()))
-            },
-            signInAnotherAccountButtonEnabled = signInToAnotherAccountEnabled,
-            oAuths = oAuths,
-            style = style,
-            fastAuthEnabled = fastAuthEnabled,
-            authParams = VKIDAuthUiParams {
-                state = this@OneTapPlatformView.state
-                codeChallenge = this@OneTapPlatformView.codeChallenge
-                scopes = this@OneTapPlatformView.scopes
-            },
-            scenario = scenario,
-        )
+        val hostLifecycle = LocalLifecycleOwner.current.lifecycle
+        val profileOwner = remember(hostLifecycle) { OneTapProfileLifecycleOwner() }
+        DisposableEffect(hostLifecycle, profileOwner) {
+            hostLifecycle.addObserver(profileOwner)
+            onDispose {
+                hostLifecycle.removeObserver(profileOwner)
+                profileOwner.dispose()
+            }
+        }
+        CompositionLocalProvider(LocalLifecycleOwner provides profileOwner) {
+            OneTap(
+                modifier = Modifier.wrapContentHeight().onGloballyPositioned {
+                    methodChannel.invokeMethod("onHeight", it.size.height)
+                },
+                onAuth = { oAuth, token ->
+                    methodChannel.invokeMethod("onAuth", token.pack { error("No id token") }?.let { it + listOf(oAuth?.name?.lowercase()) })
+                },
+                onAuthCode = { data, isCompletion ->
+                    if (isCompletion) methodChannel.invokeMethod("onAuthCode", data.pack(context))
+                },
+                onFail = { oAuth, fail ->
+                    val code = if (fail is VKIDAuthFail.Canceled) "cancelled" else fail::class.java.name
+                    methodChannel.invokeMethod("onError", listOf(code, fail.description, oAuth?.name?.lowercase()))
+                },
+                signInAnotherAccountButtonEnabled = signInToAnotherAccountEnabled,
+                oAuths = oAuths,
+                style = style,
+                fastAuthEnabled = fastAuthEnabled,
+                authParams = VKIDAuthUiParams {
+                    state = this@OneTapPlatformView.state
+                    codeChallenge = this@OneTapPlatformView.codeChallenge
+                    scopes = this@OneTapPlatformView.scopes
+                },
+                scenario = scenario,
+            )
+        }
     }
 
-    override fun getView(): View {
-        composeView.setContent { Content() }
-        return composeView
+    override fun getView(): View = composeView
+
+    @OptIn(ExperimentalComposeUiApi::class)
+    override fun onFlutterViewAttached(flutterView: View) {
+        if (hostView === flutterView) return
+        releaseComposition()
+        hostView = flutterView
+        // A Presentation's window Recomposer is cancelled on Virtual Display surface replacement.
+        // Own a Recomposer bound to the real host instead, so remembered click coroutines remain live.
+        hostRecomposer = flutterView.createLifecycleAwareWindowRecomposer()
+        composeView.setParentCompositionContext(hostRecomposer)
     }
 
-    override fun dispose() {}
+    override fun onFlutterViewDetached() {
+        releaseComposition()
+    }
+
+    override fun dispose() {
+        releaseComposition()
+    }
+
+    private fun releaseComposition() {
+        composeView.disposeComposition()
+        hostRecomposer?.cancel()
+        hostRecomposer = null
+        hostView = null
+        composeView.setParentCompositionContext(null)
+    }
 }
