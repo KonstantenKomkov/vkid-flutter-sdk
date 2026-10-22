@@ -1,5 +1,7 @@
 library vkid;
 
+import 'package:vkid_flutter_sdk/src/one_tap_resume_frame.dart';
+import 'package:vkid_flutter_sdk/src/one_tap_texture_frame.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
