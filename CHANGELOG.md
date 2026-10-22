@@ -5,6 +5,7 @@
 - Standalone Android rendering reproduction comparing texture-layer, hybrid and Virtual Display composition.
 
 ### Fixed
+- Keep the Android One Tap profile when returning from cancelled authorization, instead of fetching and animating it on every Activity resume.
 - Release One Tap callback handlers on disposal and ignore redundant native height updates.
 
 ### Changed

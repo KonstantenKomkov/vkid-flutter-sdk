@@ -54,7 +54,9 @@ android {
     }
 
     dependencies {
-        testImplementation("org.jetbrains.kotlin:kotlin-test")
+        testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
+        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
         testImplementation("org.mockito:mockito-core:5.0.0")
         implementation("com.vk.id:onetap-compose:2.6.0")
         implementation(platform("androidx.compose:compose-bom:2024.10.00"))
