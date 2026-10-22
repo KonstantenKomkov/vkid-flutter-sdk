@@ -27,7 +27,7 @@ internal class OneTapVirtualDisplayPlatformView(
         // There is no Dart flag to select VD directly. This invisible marker allocates no surface;
         // keep initAndroidView (not initSurfaceAndroidView, whose fallback is Hybrid Composition).
         container.addView(SurfaceView(context).apply { visibility = View.GONE }, FrameLayout.LayoutParams(0, 0))
-        // Cache getView(): the VK plugin calls setContent() every time that method is invoked.
+        // Keep the same Compose view when Flutter replaces the Presentation.
         container.addView(delegate.view, FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT,

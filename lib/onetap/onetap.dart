@@ -190,7 +190,20 @@ class _OneTapState extends State<OneTap> {
       default:
         throw UnsupportedError('Unsupported platform');
     }
+    if (defaultTargetPlatform == TargetPlatform.android &&
+        widget.androidCompositionMode ==
+            OneTapAndroidCompositionMode.virtualDisplay) {
+      view = OneTapResumeFrame(
+        awaitSurfaceFrame: _awaitSurfaceFrame,
+        child: view,
+      );
+    }
     return SizedBox(height: height, child: view);
+  }
+
+  Future<void> _awaitSurfaceFrame(RenderRepaintBoundary boundary) async {
+    await _callbackChannel?.invokeMethod<void>('awaitSurfaceFrame');
+    await OneTapTextureFrame.waitUntilReady(boundary);
   }
 
   @override

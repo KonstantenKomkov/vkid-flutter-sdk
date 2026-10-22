@@ -36,6 +36,7 @@ internal class OneTapPlatformView(
     private val arguments: List<Any?>,
 ) : PlatformView {
     private val composeView = ComposeView(context)
+    private val surfaceFrame = OneTapSurfaceFrame(composeView)
     private var hostView: View? = null
     private var hostRecomposer: Recomposer? = null
 
@@ -56,6 +57,10 @@ internal class OneTapPlatformView(
         // The default detach strategy discards the profile and starts the loading animation again.
         composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         composeView.setContent { Content() }
+        methodChannel.setMethodCallHandler { call, result ->
+            if (call.method == "awaitSurfaceFrame") surfaceFrame.awaitFrame(result)
+            else result.notImplemented()
+        }
     }
 
     private fun initParams() {
@@ -170,6 +175,8 @@ internal class OneTapPlatformView(
     }
 
     override fun dispose() {
+        methodChannel.setMethodCallHandler(null)
+        surfaceFrame.dispose()
         releaseComposition()
     }
 
