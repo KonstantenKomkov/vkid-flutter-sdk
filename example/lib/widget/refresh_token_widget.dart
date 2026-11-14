@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:vkid_flutter_sdk/library_vkid.dart';
-import 'package:vkid_flutter_sdk_example/uikit/default_text_field.dart';
 import 'package:vkid_flutter_sdk_example/uikit/expandable_card.dart';
 import 'package:vkid_flutter_sdk_example/utils/show_snackbar.dart';
 
@@ -19,11 +18,12 @@ class RefreshTokenWidgetState extends State<RefreshTokenWidget> {
   Widget build(BuildContext context) {
     return ExpandableCard("Refresh token", [
       ElevatedButton(
-          onPressed: () async {
-            _refreshToken();
-          },
-          child: const Text("refresh")),
-      if (refreshTokenData != null) Text(_refreshTokenText())
+        onPressed: () async {
+          _refreshToken();
+        },
+        child: const Text("refresh"),
+      ),
+      if (refreshTokenData != null) Text(_refreshTokenText()),
     ]);
   }
 

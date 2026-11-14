@@ -13,11 +13,13 @@ class ExpandableCardState extends State<ExpandableCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-        child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-            child: ExpansionTile(
-              title: Text(widget.title),
-              children: widget.children,
-            )));
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        child: ExpansionTile(
+          title: Text(widget.title),
+          children: widget.children,
+        ),
+      ),
+    );
   }
 }

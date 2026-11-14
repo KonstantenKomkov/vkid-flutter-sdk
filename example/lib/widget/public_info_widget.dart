@@ -20,10 +20,11 @@ class PublicInfoWidgetState extends State<PublicInfoWidget> {
   Widget build(BuildContext context) {
     return ExpandableCard("Public info", [
       ElevatedButton(
-          onPressed: () async {
-            _getPublicInfo();
-          },
-          child: const Text("get")),
+        onPressed: () async {
+          _getPublicInfo();
+        },
+        child: const Text("get"),
+      ),
       if (user != null) Text(_userText()),
     ]);
   }
@@ -32,11 +33,13 @@ class PublicInfoWidgetState extends State<PublicInfoWidget> {
     try {
       final vkid = await VKID.getInstance();
       final idToken = (await vkid.currentAuthData)?.idToken;
-      final response = await Dio().post("https://id.vk.ru/oauth2/public_info",
-          data: FormData.fromMap({
-            "id_token": idToken,
-            "client_id": widget.clientID,
-          }));
+      final response = await Dio().post(
+        "https://id.vk.ru/oauth2/public_info",
+        data: FormData.fromMap({
+          "id_token": idToken,
+          "client_id": widget.clientID,
+        }),
+      );
       final body = response.data;
       final userData = body["user"];
       setState(() {
@@ -58,7 +61,7 @@ class PublicInfoWidgetState extends State<PublicInfoWidget> {
 First name: ${user!.firstName}
 Last name: ${user!.lastName}
 Phone: ${user!.phone}
-Avatar: ${user!.avatarUrl?.substring(0, 16)}...
+Avatar: ${user!.avatarUrl.substring(0, 16)}...
 Email: ${user!.email}
     """;
   }
