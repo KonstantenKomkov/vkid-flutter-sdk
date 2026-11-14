@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vkid_flutter_sdk/library_vkid.dart';
@@ -39,8 +39,9 @@ void main() {
       '$mode selects native composition and retains auth parameters',
       (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: OneTap(
+          WidgetsApp(
+            color: const Color(0xFFFFFFFF),
+            builder: (context, child) => OneTap(
               key: ValueKey<OneTapAndroidCompositionMode>(mode),
               androidCompositionMode: mode,
               style: const OneTapStyle(size: OneTapSize.large48),
@@ -91,8 +92,9 @@ void main() {
 
   testWidgets('the default remains texture-layer composition', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: OneTap(
+      WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        builder: (context, child) => OneTap(
           key: const ValueKey<String>('default'),
           onAuth: (_, data) {},
         ),
@@ -113,8 +115,9 @@ void main() {
     'withOAuths accepts virtual display and keeps the OAuth payload',
     (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: OneTap.withOAuths(
+        WidgetsApp(
+          color: const Color(0xFFFFFFFF),
+          builder: (context, child) => OneTap.withOAuths(
             key: const ValueKey<String>('oauths'),
             androidCompositionMode: OneTapAndroidCompositionMode.virtualDisplay,
             alternativeOAuths: const <OneTapOAuth>{OneTapOAuth.ok},
@@ -133,8 +136,9 @@ void main() {
 
   testWidgets('Android composition is ignored on iOS', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: OneTap(
+      WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        builder: (context, child) => OneTap(
           key: const ValueKey<String>('ios'),
           androidCompositionMode: OneTapAndroidCompositionMode.virtualDisplay,
           onAuth: (_, data) {},
@@ -151,8 +155,9 @@ void main() {
       AuthCodeData? received;
       bool? completed;
       await tester.pumpWidget(
-        MaterialApp(
-          home: OneTap(
+        WidgetsApp(
+          color: const Color(0xFFFFFFFF),
+          builder: (context, child) => OneTap(
             key: const ValueKey<String>('callback'),
             androidCompositionMode: OneTapAndroidCompositionMode.virtualDisplay,
             onAuth: (_, data) {},

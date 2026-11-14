@@ -11,7 +11,6 @@ dependencies:
   dio: ^5.7.0
   flutter:
     sdk: flutter
-  material: ^1.0.0+2
   plugin_platform_interface: ^2.0.2
   synchronized: '^3.1.0+1'
   collection: ^1.17.1
