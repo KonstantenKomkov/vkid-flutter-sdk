@@ -4,11 +4,12 @@ class DefaultCheckbox extends StatefulWidget {
   final bool defaultValue;
   final ValueChanged<bool> onChanged;
   final String label;
-  const DefaultCheckbox(
-      {required this.defaultValue,
-      required this.onChanged,
-      required this.label,
-      super.key});
+  const DefaultCheckbox({
+    required this.defaultValue,
+    required this.onChanged,
+    required this.label,
+    super.key,
+  });
 
   @override
   State<DefaultCheckbox> createState() => _DefaultCheckboxState();
@@ -29,11 +30,11 @@ class _DefaultCheckboxState extends State<DefaultCheckbox> {
 
   @override
   Widget build(BuildContext context) {
-    Color getColor(Set<MaterialState> states) {
-      const Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
+    Color getColor(Set<WidgetState> states) {
+      const Set<WidgetState> interactiveStates = <WidgetState>{
+        WidgetState.pressed,
+        WidgetState.hovered,
+        WidgetState.focused,
       };
       if (states.any(interactiveStates.contains)) {
         return Colors.blue;
@@ -41,19 +42,21 @@ class _DefaultCheckboxState extends State<DefaultCheckbox> {
       return Colors.red;
     }
 
-    return Row(children: [
-      Checkbox(
-        checkColor: Colors.white,
-        fillColor: MaterialStateProperty.resolveWith(getColor),
-        value: isChecked,
-        onChanged: (bool? value) {
-          setState(() {
-            isChecked = value!;
-            onChanged(value);
-          });
-        },
-      ),
-      Text(label),
-    ]);
+    return Row(
+      children: [
+        Checkbox(
+          checkColor: Colors.white,
+          fillColor: WidgetStateProperty.resolveWith(getColor),
+          value: isChecked,
+          onChanged: (bool? value) {
+            setState(() {
+              isChecked = value!;
+              onChanged(value);
+            });
+          },
+        ),
+        Text(label),
+      ],
+    );
   }
 }
